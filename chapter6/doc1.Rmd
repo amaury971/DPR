@@ -3,26 +3,129 @@ title: "Untitled"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE} 
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+```{r}
+# Loading the dataset into a variable named dataLab2
+library(readr)
+gdpCountry <- readr::read_csv("./data/gdpCountry.csv") 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+library(gsheet)
+dataUnido<-gsheet2tbl("https://docs.google.com/spreadsheets/d/1uLaXke-KPN28-ESPPoihk8TiXVWp5xuNGHW7w7yqLCc/edit#gid=416085055")
 ```
 
-## Including Plots
+```{r}
+library(readr)
+gdp <- readr::read_csv("./data/chapter6data.csv") 
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+library(gsheet)
+locations <- gsheet2tbl("https://docs.google.com/spreadsheets/d/1nehKEBKTQx11LZuo5ZJFKTVS0p5y1ysMPSOSX_m8dS8/edit?usp=sharing")
+
+```
+
+```{r}
+# Add a new column called 'newColumn'
+dataUnido$newColumn <- 42
+dataUnido$letters <- "fuck"
+
+# Show the columns' name
+colnames(dataUnido)
+
+# Show the column 'newColumn'
+head(dataUnido[,"unit"])
+head(dataUnido[,c("newColumn","letters")]) 
+```
+
+```{r}
+# Multiply by 2 and add 5
+dataUnido$bonusround <- dataUnido$newColumn * 2 + 5
+
+# Show the column 'bonusround'
+head(dataUnido[,"bonusround"])
+
+dataUnido$ADD <- dataUnido$newColumn + dataUnido$bonusround 
+
+library(dplyr)
+# Rename the newColumn
+dataUnido <- dataUnido %>% 
+  dplyr::rename(年 =fuckinc)
+colnames(dataUnido)
+
+# Delete the column named 'newColumn'
+dataUnido$ADD <- NULL
+```
+
+```{r}
+# erasing non important variables
+dataUnido$isicCodeCombinaison <- NULL
+dataUnido$tableDefinitionCode <- NULL
+dataUnido$sourceCode <- NULL
+dataUnido$updateYear <- NULL
+dataUnido$unit <- NULL
+dataUnido$年<- NULL
+dataUnido$bonusround<- NULL
+dataUnido$newColumnRenamed<- NULL
+
+# Show columns' name
+colnames(dataUnido)
+```
+
+```{r}
+# Loading the dplyr package
+library(dplyr)
+# Subset of dataUnido based on countryCode == Canada
+dataUnidoCanada <- filter(dataUnido, countryCode == 124)
+dataUnido2012 <- filter(dataUnido, year == 2012)
+
+# Subset of dataUnidoCanada based on two variables (number of employees and establishments)
+dataUnidoCanadaVariables <- filter(dataUnidoCanada, tableCode == 4 | tableCode == 1)
+
+# Subset of dataUnido based on countryCode == Canada
+dataUnidoCanadaVariablesAfter2009 <- filter(dataUnidoCanadaVariables, year > 2009)
+
+# dataSorted will receive the dataframe dataUnidoCanadaVariablesAfter2009 sorted by the column value
+dataSorted <- arrange(dataUnidoCanadaVariablesAfter2009, value)
+dataReversed <- arrange(dataUnidoCanadaVariablesAfter2009, desc(value))
+```
+
+```{r}
+gdp$X1 <- NULL
+library(dplyr)
+gdp2 <-filter(gdp, country=="United States" | country=="Canada" | country=="Japan" | country=="Belgium" | country=="France")
+```
+
+```{r}
+# Loading tidyr
+library(tidyr)
+# Using pivot_wider() to transform a long dataframe into a wide dataframe
+wideData <- dataSorted %>%
+  pivot_wider(names_from = isicCode, values_from = value)
+
+# Loading tidyr
+library(tidyr)
+# Using pivot_longer() to transform from wide to long data
+longData <- wideData %>% 
+  pivot_longer(!c(year, tableCode, countryCode), names_to = "isicCode", values_to = "value") 
+```
+
+```{r}
+longData2 <- dataSorted %>%
+  pivot_wider(names_from = tableCode, values_from = value)
+
+longData2 <- wideData2 %>% 
+  pivot_longer(!c(year, isicCode, countryCode), names_to = "tableCodeNew", values_to = "valueNew") 
+
+```
+
+```{r}
+#Hands dirty page 44
+library(tidyr)
+gdp3 <- gdp2 %>%
+  pivot_longer(!c(country), names_to = "year", values_to = "gdp")
+```
+
